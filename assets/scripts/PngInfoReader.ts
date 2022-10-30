@@ -79,58 +79,63 @@ export class PngInfoReader {
     }
     this.#listeners[event].push(callback)
   }
-  read(file?: File) {
+  async read(file?: File) {
     const fileReader = new FileReader()
-    fileReader.onload = () => {
-      this.#listeners['start']?.forEach((callback) => {
-        callback()
-      })
-      const text_decoder = new TextDecoder('utf-8')
-      const bytes = fileReader.result as ArrayBuffer
-      const uint8bytes = new Uint8Array(bytes)
-      if (
-        uint8bytes[0] === 0x89 &&
-        uint8bytes[1] === 'P'.charCodeAt(0) &&
-        uint8bytes[2] === 'N'.charCodeAt(0) &&
-        uint8bytes[3] === 'G'.charCodeAt(0) &&
-        uint8bytes[4] === 0x0d &&
-        uint8bytes[5] === 0x0a &&
-        uint8bytes[6] === 0x1a &&
-        uint8bytes[7] === 0x0a
-      ) {
-        for (let i = 8; i < uint8bytes.byteLength;) {
-          const chunkSize = new Uint32Array(
-            uint8bytes.slice(i, i + 4).reverse().buffer
-          )[0]
-          i += 4
-          const chunkType = text_decoder.decode(uint8bytes.slice(i, i + 4))
-          i += 4
-          const chunkData = uint8bytes.slice(i, i + chunkSize)
-          i += Number(chunkSize)
-          const chunkCrc = uint8bytes.slice(i, i + 4)
-          i += 4
-          this.#listeners['chunk']?.forEach((callback) => {
-            callback({ chunkType, chunkSize, chunkData, chunkCrc })
-          })
-          if (chunkType === PngInfoReaderChunkTypeIend) {
-            break
+    const text_decoder = new TextDecoder('utf-8')
+
+    return new Promise((resolve, reject) => {
+      fileReader.onload = (event: ProgressEvent<FileReader>) => {
+        this.#listeners['start']?.forEach((callback) => {
+          callback()
+        })
+        const bytes = event?.target?.result as ArrayBuffer
+        const uint8bytes = new Uint8Array(bytes)
+        if (
+          uint8bytes[0] === 0x89 &&
+          uint8bytes[1] === 'P'.charCodeAt(0) &&
+          uint8bytes[2] === 'N'.charCodeAt(0) &&
+          uint8bytes[3] === 'G'.charCodeAt(0) &&
+          uint8bytes[4] === 0x0d &&
+          uint8bytes[5] === 0x0a &&
+          uint8bytes[6] === 0x1a &&
+          uint8bytes[7] === 0x0a
+        ) {
+          for (let i = 8; i < uint8bytes.byteLength;) {
+            const chunkSize = new Uint32Array(
+              uint8bytes.slice(i, i + 4).reverse().buffer
+            )[0]
+            i += 4
+            const chunkType = text_decoder.decode(uint8bytes.slice(i, i + 4))
+            i += 4
+            const chunkData = uint8bytes.slice(i, i + chunkSize)
+            i += Number(chunkSize)
+            const chunkCrc = uint8bytes.slice(i, i + 4)
+            i += 4
+            this.#listeners['chunk']?.forEach((callback) => {
+              callback({ chunkType, chunkSize, chunkData, chunkCrc })
+            })
+            if (chunkType === PngInfoReaderChunkTypeIend) {
+              break
+            }
           }
+        } else {
+          this.#listeners['error']?.forEach((callback) => {
+            callback()
+          })
         }
+        this.#listeners['end']?.forEach((callback) => {
+          callback()
+        })
+        resolve(undefined)
+      }
+      if (file) {
+        fileReader.readAsArrayBuffer(file)
       } else {
         this.#listeners['error']?.forEach((callback) => {
           callback()
         })
+        reject()
       }
-      this.#listeners['end']?.forEach((callback) => {
-        callback()
-      })
-    }
-    if (file) {
-      fileReader.readAsArrayBuffer(file)
-    } else {
-      this.#listeners['error']?.forEach((callback) => {
-        callback()
-      })
-    }
+    })
   }
 }
