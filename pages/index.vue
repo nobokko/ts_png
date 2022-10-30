@@ -1,5 +1,5 @@
 <template>
-  <Tutorial />
+  <PngInfo />
 </template>
 
 <script lang="ts">
