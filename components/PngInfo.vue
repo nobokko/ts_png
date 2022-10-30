@@ -48,6 +48,7 @@
           before:block before:absolute before:left-0
           ml-32
           before:content-[attr(data-before-content)]
+          break-all
         "
         data-before-content="prompt"
       >
@@ -71,6 +72,7 @@
           before:block before:absolute before:left-0
           ml-32
           before:content-[attr(data-before-content)]
+          break-all
         "
         data-before-content="negative prompt"
       >
@@ -91,6 +93,7 @@
           before:block before:absolute before:left-0
           ml-32
           before:content-[attr(data-before-content)]
+          break-all
         "
         data-before-content="non prompt"
       >
