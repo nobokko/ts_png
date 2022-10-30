@@ -11,7 +11,10 @@
     "lint:prettier": "prettier --check .",
     "lint": "yarn lint:js && yarn lint:prettier",
     "lintfix": "prettier --write --list-different . && yarn lint:js --fix",
-    "test": "jest"
+    "test": "jest",
+    "build:gh-pages": "DEPLOY_ENV=GH_PAGES nuxt build",
+    "generate:gh-pages": "DEPLOY_ENV=GH_PAGES nuxt generate",
+    "deploy:github": "push-dir --dir=dist --branch=master --cleanup"
   },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^6.2.0",
@@ -49,6 +52,7 @@
     "jest-environment-jsdom": "^29.1.2",
     "postcss": "^8.4.17",
     "prettier": "^2.7.1",
+    "push-dir": "^0.4.1",
     "ts-jest": "^29.0.3",
     "vue-jest": "^3.0.4"
   }

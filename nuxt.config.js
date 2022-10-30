@@ -7,6 +7,11 @@ export default {
   // Target: https://go.nuxtjs.dev/config-target
   target: 'static',
 
+  // https://nuxtjs.org/deployments/github-pages/
+  router: {
+    base: process.env.DEPLOY_ENV === 'GH_PAGES' ? '/ts_png/' : '',
+  },
+
   // Global page headers: https://go.nuxtjs.dev/config-head
   head: {
     title: 'ts_png',
