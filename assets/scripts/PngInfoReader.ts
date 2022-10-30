@@ -1,5 +1,5 @@
 /** */
-type PngInfoReaderEventType = 'start' | 'chunk' | 'end' | 'error'
+type PngInfoReaderEventType = 'start' | 'chunk' | 'text' | 'end' | 'error'
 /**
  * IHDR - 最も先頭に配置されるチャンクで、以下の順番で13バイトの情報が含まれる。
  * 画像の幅（4バイト）
@@ -69,16 +69,100 @@ type PngInfoReaderChunkType = PngInfoReaderChunkRequiredType | PngInfoReaderChun
 export type PngInfoReaderChunkEventParameter = { chunkType: PngInfoReaderChunkType, chunkSize: number, chunkData: Uint8Array, chunkCrc: Uint8Array }
 /** */
 type PngInfoReaderChunkEventCallableFunction = (chunkInfo: PngInfoReaderChunkEventParameter) => void
+/** */
+export type PngInfoReaderTextEventParameter = { chunkType: PngInfoReaderChunkType, key: string, value: string, data: string }
+/** */
+type PngInfoReaderTextEventCallableFunction = (textInfo: PngInfoReaderTextEventParameter) => void
 
 /** */
 export class PngInfoReader {
+  /**
+   * 
+   */
   #listeners: { [key: string]: CallableFunction[] } = {}
-  addEventListener(event: PngInfoReaderEventType, callback: CallableFunction | PngInfoReaderChunkEventCallableFunction) {
+
+  /**
+   * 
+   */
+  #iso_decoder = new TextDecoder('iso-8859-1')
+
+  /**
+   * 
+   */
+  #utf8_decoder = new TextDecoder('utf-8')
+
+  /**
+   * 
+   */
+  constructor() {
+    this.addEventListener('chunk', this.eventChunkText)
+    this.addEventListener('chunk', this.eventChunkItxt)
+  }
+
+  /**
+   * 
+   * @param event 
+   * @param callback 
+   */
+  addEventListener(event: PngInfoReaderEventType, callback: CallableFunction | PngInfoReaderChunkEventCallableFunction | PngInfoReaderTextEventCallableFunction) {
     if (!this.#listeners[event]) {
       this.#listeners[event] = []
     }
     this.#listeners[event].push(callback)
   }
+
+  /**
+   * 
+   * @param event 
+   * @param callback 
+   */
+  removeEventListener(event: PngInfoReaderEventType, callback: CallableFunction) {
+    if (this.#listeners[event]) {
+      this.#listeners[event] = this.#listeners[event].filter(eventCallback => {
+        return eventCallback === callback
+      })
+    }
+  }
+
+  /**
+   * tEXt
+   * @param chunkInfo 
+   * @returns 
+   */
+  eventChunkText: PngInfoReaderChunkEventCallableFunction = (chunkInfo: PngInfoReaderChunkEventParameter) => {
+    if ('tEXt' !== chunkInfo.chunkType) {
+      return
+    }
+
+    const str = this.#iso_decoder.decode(chunkInfo.chunkData)
+    const [, key, data, value] = str.match(/^([^\0]*)(\0)([\s\S]*)$/m) ?? ['', '', '', '']
+    this.#listeners.text?.forEach((callback) => {
+      callback({ chunkType: chunkInfo.chunkType, key, value, data })
+    })
+  }
+
+  /**
+   * iTXt
+   * @param chunkInfo 
+   * @returns 
+   */
+  eventChunkItxt: PngInfoReaderChunkEventCallableFunction = (chunkInfo: PngInfoReaderChunkEventParameter) => {
+    if ('iTXt' !== chunkInfo.chunkType) {
+      return
+    }
+
+    const str = this.#utf8_decoder.decode(chunkInfo.chunkData)
+    const [, key, data, value] = str.match(/^([^\0]*)(\0[\s\S]{4})([\s\S]*)$/m) ?? ['', '', '', '']
+    this.#listeners.text?.forEach((callback) => {
+      callback({ chunkType: chunkInfo.chunkType, key, value, data })
+    })
+  }
+
+  /**
+   * 
+   * @param file 
+   * @returns 
+   */
   async read(file?: File) {
     const fileReader = new FileReader()
     const text_decoder = new TextDecoder('utf-8')

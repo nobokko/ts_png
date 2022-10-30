@@ -32,27 +32,6 @@ describe('PngInfoReader', () => {
         }
     })
 
-    test('read normal 1', async () => {
-        const reader = new PngInfoReader()
-
-        await reader.read(getFile('PngInfoReader.ts.1.png'))
-    })
-
-    test('read normal 2', async () => {
-        const reader = new PngInfoReader()
-
-        reader.addEventListener('end', () => {
-        })
-        reader.addEventListener('error', () => {
-        })
-        reader.addEventListener('start', () => {
-        })
-        reader.addEventListener('chunk', (chunkInfo:PngInfoReaderChunkEventParameter) => {
-        })
-
-        await reader.read(getFile('PngInfoReader.ts.1.png'))
-    })
-
     test('read undefined 1', async () => {
         const reader = new PngInfoReader()
 
@@ -74,6 +53,71 @@ describe('PngInfoReader', () => {
 
         await reader.read(undefined).catch(() => {
         })
+    })
+
+    test('read normal tEXt 1', async () => {
+        const reader = new PngInfoReader()
+
+        reader.removeEventListener('chunk', reader.eventChunkText)
+        reader.removeEventListener('chunk', reader.eventChunkItxt)
+
+        await reader.read(getFile('PngInfoReader.ts.1.png'))
+    })
+
+    test('read normal tEXt 2', async () => {
+        const reader = new PngInfoReader()
+
+        reader.addEventListener('end', () => {
+        })
+        reader.addEventListener('error', () => {
+        })
+        reader.addEventListener('start', () => {
+        })
+
+        await reader.read(getFile('PngInfoReader.ts.1.png'))
+    })
+
+    test('read normal tEXt 3', async () => {
+        const reader = new PngInfoReader()
+
+        reader.addEventListener('end', () => {
+        })
+        reader.addEventListener('error', () => {
+        })
+        reader.addEventListener('start', () => {
+        })
+        reader.addEventListener('text', () => {
+        })
+
+        await reader.read(getFile('PngInfoReader.ts.1.png'))
+    })
+
+    test('read normal iTXt 1', async () => {
+        const reader = new PngInfoReader()
+
+        reader.addEventListener('end', () => {
+        })
+        reader.addEventListener('error', () => {
+        })
+        reader.addEventListener('start', () => {
+        })
+
+        await reader.read(getFile('PngInfoReader.ts.3.png'))
+    })
+
+    test('read normal iTXt 2', async () => {
+        const reader = new PngInfoReader()
+
+        reader.addEventListener('end', () => {
+        })
+        reader.addEventListener('error', () => {
+        })
+        reader.addEventListener('start', () => {
+        })
+        reader.addEventListener('text', () => {
+        })
+
+        await reader.read(getFile('PngInfoReader.ts.3.png'))
     })
 
     test('read not png file 1', async () => {

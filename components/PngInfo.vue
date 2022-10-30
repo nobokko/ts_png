@@ -4,7 +4,8 @@
     data-pnginfo="root"
     class="
       relative
-      flex flex-row gap-x-4
+      flex flex-row
+      gap-x-4
       items-top
       justify-center
       min-h-screen
@@ -20,10 +21,7 @@
         </label>
       </form>
     </div>
-    <div class="
-      min-h-screen basis-2/3
-      relative flex flex-col gap-y-4	
-    ">
+    <div class="min-h-screen basis-2/3 relative flex flex-col gap-y-4">
       <div
         class="
           before:block before:absolute before:left-0
@@ -34,11 +32,13 @@
       >
         <span
           class="cursor-pointer"
-          v-clipboard:copy="promptArea + '\n' + nevativePromptArea + '\n' + nonPromptArea"
+          v-clipboard:copy="
+            promptArea + '\n' + nevativePromptArea + '\n' + nonPromptArea
+          "
           v-clipboard:success="onCopySuccess"
           v-clipboard:error="onCopyError"
         >
-          <font-awesome-icon icon="fa-regular fa-clone"/>
+          <font-awesome-icon icon="fa-regular fa-clone" />
         </span>
       </div>
       <div
@@ -58,7 +58,10 @@
           v-clipboard:success="onCopySuccess"
           v-clipboard:error="onCopyError"
         >
-          <font-awesome-icon class="cursor-pointer" icon="fa-regular fa-clone"/>
+          <font-awesome-icon
+            class="cursor-pointer"
+            icon="fa-regular fa-clone"
+          />
         </span>
       </div>
       <div
@@ -78,7 +81,7 @@
           v-clipboard:success="onCopySuccess"
           v-clipboard:error="onCopyError"
         >
-          <font-awesome-icon icon="fa-regular fa-clone"/>
+          <font-awesome-icon icon="fa-regular fa-clone" />
         </span>
       </div>
       <div
@@ -98,7 +101,7 @@
           v-clipboard:success="onCopySuccess"
           v-clipboard:error="onCopyError"
         >
-          <font-awesome-icon icon="fa-regular fa-clone"/>
+          <font-awesome-icon icon="fa-regular fa-clone" />
         </span>
       </div>
     </div>
@@ -108,7 +111,7 @@
 <script lang="ts">
 import {
   PngInfoReader,
-  PngInfoReaderChunkEventParameter,
+  PngInfoReaderTextEventParameter,
 } from '~/assets/scripts/PngInfoReader'
 import Vue, { defineComponent } from 'vue'
 import VueClipboard from 'vue-clipboard2'
@@ -126,15 +129,17 @@ export default defineComponent({
     }
   },
   methods: {
-    onCopySuccess: function (e: string|HTMLElement|HTMLCollection|NodeList) {
-      this.$toast.success('クリップボードにコピーしました');
+    onCopySuccess: function (
+      e: string | HTMLElement | HTMLCollection | NodeList
+    ) {
+      this.$toast.success('クリップボードにコピーしました')
     },
-    onCopyError: function (e: string|HTMLElement|HTMLCollection|NodeList) {
-      this.$toast.error('クリップボードにコピーできなかったかも');
+    onCopyError: function (
+      e: string | HTMLElement | HTMLCollection | NodeList
+    ) {
+      this.$toast.error('クリップボードにコピーできなかったかも')
     },
     readfile: function (e: Event) {
-      const text_decoder = new TextDecoder('utf-8')
-      const iso_decoder = new TextDecoder('iso-8859-1')
       const file = (<HTMLInputElement | null>e?.target)?.files?.[0]
 
       const pngInfoReader = new PngInfoReader()
@@ -142,41 +147,15 @@ export default defineComponent({
         this.promptArea = ''
       })
       pngInfoReader.addEventListener(
-        'chunk',
-        (chunkInfo: PngInfoReaderChunkEventParameter) => {
-          if (
-            chunkInfo.chunkType === 'tEXt' ||
-            chunkInfo.chunkType === 'iTXt'
-          ) {
+        'text',
+        (params: PngInfoReaderTextEventParameter) => {
+          const { key, data, value } = params
+          if (key === 'parameters') {
             const reParamCode = new RegExp(
               '\\s*([\\w ]+):\\s*("(?:\\|"|[^"])+"|[^,]*)(?:,|$)',
               'g'
             )
             const reParams = new RegExp('^(?:' + reParamCode.source + '){3,}$')
-            const str = (
-              chunkInfo.chunkType === 'iTXt' ? text_decoder : iso_decoder
-            ).decode(chunkInfo.chunkData)
-            const [, key, data, value] = (() => {
-              switch (chunkInfo.chunkType) {
-                case 'tEXt':
-                  return (
-                    str.match(/^([^\0]*)(\0)([\s\S]*)$/m) ?? ['', '', '', '']
-                  )
-                case 'iTXt':
-                  return (
-                    str.match(/^([^\0]*)(\0....)([\s\S]*)$/m) ?? [
-                      '',
-                      '',
-                      '',
-                      '',
-                    ]
-                  )
-              }
-
-              return []
-            })()
-            if (key === 'parameters') {
-            }
             const splitedStr = value.split('\n')
             const maybeNonPromptInfo = (() => {
               const lastLine = splitedStr.pop() ?? ''
@@ -195,7 +174,10 @@ export default defineComponent({
                 prompt: string
                 negativePrompt: string
               }>(
-                (prev, current) => {
+                (
+                  prev: { prompt: string; negativePrompt: string },
+                  current: string
+                ) => {
                   if (current.startsWith('Negative prompt:')) {
                     done_with_prompt = true
                     prev.negativePrompt += current.substring(16)
@@ -226,6 +208,7 @@ export default defineComponent({
           }
         }
       )
+
       pngInfoReader.read(file)
 
       if (file) {
