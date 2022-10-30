@@ -127,10 +127,10 @@ export default defineComponent({
   },
   methods: {
     onCopySuccess: function (e: string|HTMLElement|HTMLCollection|NodeList) {
-      this.$toasted.success('クリップボードにコピーしました');
+      this.$toast.success('クリップボードにコピーしました');
     },
     onCopyError: function (e: string|HTMLElement|HTMLCollection|NodeList) {
-      this.$toasted.error('クリップボードにコピーできなかったかも');
+      this.$toast.error('クリップボードにコピーできなかったかも');
     },
     readfile: function (e: Event) {
       const text_decoder = new TextDecoder('utf-8')
