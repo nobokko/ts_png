@@ -19,6 +19,7 @@
       "@nuxt/types",
       "@nuxtjs/toast",
       "@types/jest",
+      "@vue/test-utils/types",
       "@types/node"
     ]
   },

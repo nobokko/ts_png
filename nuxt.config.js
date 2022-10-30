@@ -1,4 +1,5 @@
 import * as FontAwesome from './configs/fontawesome'
+import { resolve } from 'path'
 
 export default {
   // Disable server-side rendering: https://go.nuxtjs.dev/ssr-mode
@@ -65,6 +66,15 @@ export default {
     webpack: {
       ignored: /node_modules/,
       poll: true,
+    },
+  },
+
+  typescript: {
+    typeCheck: {
+      typescript: {
+        configFile: resolve(__dirname, 'tsconfig.nuxt.json'),
+        extensions: { vue: true },
+      },
     },
   },
 
