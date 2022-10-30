@@ -115,7 +115,7 @@ import VueClipboard from 'vue-clipboard2'
 Vue.use(VueClipboard)
 
 export default defineComponent({
-  name: 'NuxtTutorial',
+  name: 'PngInfo',
   data() {
     return {
       data: [],
