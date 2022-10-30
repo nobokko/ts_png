@@ -32,7 +32,13 @@ describe('PngInfoReader', () => {
         }
     })
 
-    test('read normal', async () => {
+    test('read normal 1', async () => {
+        const reader = new PngInfoReader()
+
+        await reader.read(getFile('PngInfoReader.ts.1.png'))
+    })
+
+    test('read normal 2', async () => {
         const reader = new PngInfoReader()
 
         reader.addEventListener('end', () => {
@@ -47,7 +53,14 @@ describe('PngInfoReader', () => {
         await reader.read(getFile('PngInfoReader.ts.1.png'))
     })
 
-    test('read undefined', async () => {
+    test('read undefined 1', async () => {
+        const reader = new PngInfoReader()
+
+        await reader.read(undefined).catch(() => {
+        })
+    })
+
+    test('read undefined 2', async () => {
         const reader = new PngInfoReader()
 
         reader.addEventListener('end', () => {
@@ -63,7 +76,13 @@ describe('PngInfoReader', () => {
         })
     })
 
-    test('read not png file', async () => {
+    test('read not png file 1', async () => {
+        const reader = new PngInfoReader()
+
+        await reader.read(getFile('PngInfoReader.ts.2.jpg'))
+    })
+
+    test('read not png file 2', async () => {
         const reader = new PngInfoReader()
 
         reader.addEventListener('end', () => {

@@ -88,7 +88,7 @@ export class PngInfoReader {
         this.#listeners['start']?.forEach((callback) => {
           callback()
         })
-        const bytes = event?.target?.result as ArrayBuffer
+        const bytes = event.target!.result as ArrayBuffer
         const uint8bytes = new Uint8Array(bytes)
         if (
           uint8bytes[0] === 0x89 &&
