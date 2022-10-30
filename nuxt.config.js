@@ -1,3 +1,5 @@
+import * as FontAwesome from './configs/fontawesome'
+
 export default {
   // Disable server-side rendering: https://go.nuxtjs.dev/ssr-mode
   ssr: false,
@@ -32,6 +34,10 @@ export default {
     '@nuxt/typescript-build',
     // https://go.nuxtjs.dev/tailwindcss
     '@nuxtjs/tailwindcss',
+    // fontawesome
+    ['@nuxtjs/fontawesome', { component: 'fontAwesome', suffix: true }],
+    // vue-toasted
+    ['@nuxtjs/toast'],
   ],
 
   // Modules: https://go.nuxtjs.dev/config-modules
@@ -55,5 +61,18 @@ export default {
       ignored: /node_modules/,
       poll: true,
     },
+  },
+
+  fontawesome: {
+    icons: {
+      solid: FontAwesome.solid,
+      regular: FontAwesome.regular,
+      brands: FontAwesome.brands
+    }
+  },
+
+  toast: {
+    position: 'bottom-center',
+    duration: 1000
   },
 }
