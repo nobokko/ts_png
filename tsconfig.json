@@ -18,6 +18,7 @@
     "types": [
       "@nuxt/types",
       "@nuxtjs/toast",
+      "@types/jest",
       "@types/node"
     ]
   },
