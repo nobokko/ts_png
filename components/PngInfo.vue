@@ -153,61 +153,78 @@ export default defineComponent({
         'text',
         (params: PngInfoReaderTextEventParameter) => {
           const { key, data, value } = params
-          if (key === 'parameters') {
-            const reParamCode = new RegExp(
-              '\\s*([\\w ]+):\\s*("(?:\\|"|[^"])+"|[^,]*)(?:,|$)',
-              'g'
-            )
-            const reParams = new RegExp('^(?:' + reParamCode.source + '){3,}$')
-            const splitedStr = value.split('\n')
-            const maybeNonPromptInfo = (() => {
-              const lastLine = splitedStr.pop() ?? ''
-              console.log(reParams.source)
-              if (reParams.test(lastLine)) {
-                return lastLine
-              } else {
-                splitedStr.push(lastLine)
-
-                return ''
-              }
-            })()
-            const { prompt, negativePrompt } = (() => {
-              let done_with_prompt = false
-              return splitedStr.reduce<{
-                prompt: string
-                negativePrompt: string
-              }>(
-                (
-                  prev: { prompt: string; negativePrompt: string },
-                  current: string
-                ) => {
-                  if (current.startsWith('Negative prompt:')) {
-                    done_with_prompt = true
-                    prev.negativePrompt += current.substring(16)
+          switch (key) {
+            case 'parameters':
+              {
+                const reParamCode = new RegExp(
+                  '\\s*([\\w ]+):\\s*("(?:\\|"|[^"])+"|[^,]*)(?:,|$)',
+                  'g'
+                )
+                const reParams = new RegExp(
+                  '^(?:' + reParamCode.source + '){3,}$'
+                )
+                const splitedStr = value.split('\n')
+                const maybeNonPromptInfo = (() => {
+                  const lastLine = splitedStr.pop() ?? ''
+                  console.log(reParams.source)
+                  if (reParams.test(lastLine)) {
+                    return lastLine
                   } else {
-                    if (done_with_prompt) {
-                      prev.negativePrompt += current
-                    } else {
-                      prev.prompt += current
-                    }
+                    splitedStr.push(lastLine)
+
+                    return ''
                   }
+                })()
+                const { prompt, negativePrompt } = (() => {
+                  let done_with_prompt = false
+                  return splitedStr.reduce<{
+                    prompt: string
+                    negativePrompt: string
+                  }>(
+                    (
+                      prev: { prompt: string; negativePrompt: string },
+                      current: string
+                    ) => {
+                      if (current.startsWith('Negative prompt:')) {
+                        done_with_prompt = true
+                        prev.negativePrompt += current.substring(16)
+                      } else {
+                        if (done_with_prompt) {
+                          prev.negativePrompt += current
+                        } else {
+                          prev.prompt += current
+                        }
+                      }
+
+                      return prev
+                    },
+                    { prompt: '', negativePrompt: '' }
+                  )
+                })()
+                const nonPromptInfo = [
+                  ...maybeNonPromptInfo.matchAll(reParamCode),
+                ].reduce<{ [key: string]: string }>((prev, current) => {
+                  const [, key, value] = current
+                  prev[key] = value
 
                   return prev
-                },
-                { prompt: '', negativePrompt: '' }
-              )
-            })()
-            const nonPromptInfo = [
-              ...maybeNonPromptInfo.matchAll(reParamCode),
-            ].reduce<{ [key: string]: string }>((prev, current) => {
-              const [, key, value] = current
-              prev[key] = value
-
-              return prev
-            }, {})
-            this.promptArea = prompt
-            this.nevativePromptArea = negativePrompt
-            this.nonPromptArea = maybeNonPromptInfo
+                }, {})
+                this.promptArea = prompt
+                this.nevativePromptArea = negativePrompt
+                this.nonPromptArea = maybeNonPromptInfo
+              }
+              break
+            case 'Description': {
+              this.promptArea = value
+            }
+            case 'Comment': {
+              try {
+                const nonPromptInfo:{[key:string]:any} = JSON.parse(value)
+                this.nevativePromptArea = (nonPromptInfo?.['uc'] ?? '') as string
+                delete nonPromptInfo['uc']
+                this.nonPromptArea = JSON.stringify(nonPromptInfo)
+              } catch (exception) {}
+            }
           }
         }
       )
