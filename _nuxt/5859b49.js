@@ -1,0 +1,1 @@
+(window.webpackJsonp=window.webpackJsonp||[]).push([[4],{335:function(n,e,t){"use strict";t.r(e);var l=t(0).a.extend({name:"IndexPage"}),o=t(62),component=Object(o.a)(l,(function(){var n=this._self._c;this._self._setupProxy;return n("PngInfo")}),[],!1,null,null,null);e.default=component.exports;installComponents(component,{PngInfo:t(333).default})}}]);
