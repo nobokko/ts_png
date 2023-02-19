@@ -1,4 +1,3 @@
-<!-- Please remove this file from your project -->
 <template>
   <div
     data-pnginfo="root"
@@ -262,6 +261,7 @@ function uiElementIsVisible(el: Element) {
   }
   return isVisible
 }
+
 function isValidImageList(files?: FileList) {
   return (
     files &&
