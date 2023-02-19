@@ -16,6 +16,9 @@
     "generate:gh-pages": "DEPLOY_ENV=GH_PAGES nuxt generate",
     "deploy:github:gh-pages": "push-dir --dir=dist --branch=gh-pages --cleanup"
   },
+  "resolutions": {
+    "@nuxt/kit": "3.0.0-rc.13"
+  },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^6.2.0",
     "@fortawesome/free-brands-svg-icons": "^6.2.0",
